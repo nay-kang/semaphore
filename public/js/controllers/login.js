@@ -33,4 +33,31 @@ define(function () {
 			});
 		}
 	}]);
+	
+	app.registerController('TotpCtrl', ['$scope', '$rootScope', '$http', '$state', function ($scope, $rootScope, $http, $state) {
+		
+		$scope.status = "";
+		$scope.verify_code='';
+		$scope.img_src="";
+		
+		
+		$http.get('/auth/totp/isbind').then(function (response) {
+			if(!response['data']['isbind']){
+				$scope.img_src="data:image/png;base64,"+response['data']['base64_qrcode'];
+			}
+		})
+		
+		$scope.submitCode = function(){
+			$scope.status = '';
+			$http.post('/auth/totp/verify_code',{
+				"verify_code":$scope.verify_code
+			}).then(function (response){
+				if(response['data']['success']){
+					window.location = document.baseURI;
+				}else{
+					$scope.status = 'Wrong Verify Code';
+				}
+			});
+		}
+	}]);
 });

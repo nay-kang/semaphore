@@ -33,6 +33,11 @@ func Route() mulekick.Router {
 
 	api.Use(authentication)
 
+	func(api mulekick.Router) {
+		api.Get("/isbind", totp_isbind)
+		api.Post("/verify_code", totp_verify)
+	}(api.Group("/auth/totp"))
+
 	api.Get("/ws", sockets.Handler)
 
 	api.Get("/info", getSystemInfo)

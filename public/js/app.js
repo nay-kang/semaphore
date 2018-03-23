@@ -63,7 +63,11 @@ app.run(['$rootScope', '$window', '$couchPotato', '$injector', '$state', '$http'
 
 				$rootScope.refreshInfo();
 				$rootScope.startWS();
-			}, function () {
+			}, function (response) {
+				if(response['data']['session_valid_totp']==false){
+					$state.go("auth.totp");
+					return;
+				}
 				$state.go('auth.login');
 			});
 	}

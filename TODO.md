@@ -1,0 +1,3 @@
+- [ ] split session expiration to config. not hard code.
+- [ ] use auto increment id for both user id and session is not that safe.
+- [ ] user password without salt.still not safe.

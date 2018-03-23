@@ -13,6 +13,15 @@ app.config(function ($stateProvider, $urlRouterProvider, $locationProvider, $cou
 			$d: $couchPotatoProvider.resolveDependencies(['controllers/login'])
 		}
 	})
+	.state('auth.totp',{
+		url: '/totp',
+		pageTitle: "Two Factor",
+		templateUrl: "/tpl/auth/totp.html",
+		controller: "TotpCtrl",
+		resolve: {
+			$d: $couchPotatoProvider.resolveDependencies(['controllers/login'])
+		}
+	})
 	.state('auth.logout', {
 		url: '/logout',
 		public: true,

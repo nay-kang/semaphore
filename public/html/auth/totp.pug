@@ -1,0 +1,13 @@
+.col-sm-4.col-sm-offset-4.login-page
+	h3.text-center SEMAPHORE
+
+	form.form-horizontal
+		.form-group(ng-if="status.length > 0"): .col-sm-12: p.help-block.text-center(ng-bind="status")
+		
+		.form-group(ng-if="img_src.length > 0"): .col-sm-12: img.text-center(ng-src="{{ img_src }}")
+
+		.form-group: .col-sm-12
+			input.text-center.form-control.input-lg(type="text" ng-model="verify_code" placeholder="Verify Code")
+
+		.form-group(style="margin-top: 25px"): .col-sm-12
+			button.btn.btn-primary.btn-block.btn-lg(ng-click="submitCode()") Sign In

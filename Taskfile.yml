@@ -33,14 +33,14 @@ tasks:
     dir: public
     cmds:
       - git submodule update --init --recursive
-      - npm i -g less pug-cli
+      - sudo npm i -g less pug-cli
       - npm i async
 
   deps:watch:
     desc: Installs tools needed for watch commands
     dir: public
     cmds:
-      - npm install -g nodemon
+      - sudo npm install -g nodemon
       - go get github.com/cespare/reflex
 
   compile:

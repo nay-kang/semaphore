@@ -1,9 +1,12 @@
 package api
 
 import (
+	"bytes"
 	"crypto/tls"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
+	"image/png"
 	"net/http"
 	"net/mail"
 	"strings"
@@ -13,7 +16,9 @@ import (
 	"github.com/ansible-semaphore/semaphore/db"
 	"github.com/ansible-semaphore/semaphore/util"
 	"github.com/castawaylabs/mulekick"
+	"github.com/gorilla/context"
 	sq "github.com/masterminds/squirrel"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/ldap.v2"
 )
@@ -207,4 +212,84 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func totp_isbind(w http.ResponseWriter, r *http.Request) {
+	if userID, exists := context.GetOk(r, "userID"); exists {
+
+		u, err := db.FetchUser(userID.(int))
+
+		if err != nil {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		isbind := (u.TotpKey.String != "")
+
+		//generate totp image
+		var imgBase64Str = ""
+		if !isbind {
+			key, err := totp.Generate(totp.GenerateOpts{
+				Issuer:      "deploy",
+				AccountName: u.Name,
+			})
+			if err != nil {
+				panic(err)
+			}
+			img, err := key.Image(200, 200)
+			var buf bytes.Buffer
+			png.Encode(&buf, img)
+			imgBase64Str = base64.StdEncoding.EncodeToString(buf.Bytes())
+			//update user totp key
+			if _, err := db.Mysql.Exec("update user set totp_key=? where id=?", key.Secret(), userID); err != nil {
+				panic(err)
+			}
+		}
+		d := map[string]interface{}{
+			"isbind":        isbind,
+			"base64_qrcode": imgBase64Str,
+		}
+
+		mulekick.WriteJSON(w, http.StatusOK, d)
+		return
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+}
+
+func totp_verify(w http.ResponseWriter, r *http.Request) {
+	userID, exists := context.GetOk(r, "userID")
+	if !exists {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	sessionID, exists := context.GetOk(r, "sessionID")
+	if !exists {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	u, err := db.FetchUser(userID.(int))
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	var code struct {
+		VerifyCode string `json:"verify_code"`
+	}
+	if err := mulekick.Bind(w, r, &code); err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	verify_code := code.VerifyCode
+	valid := totp.Validate(verify_code, u.TotpKey.String)
+	db.UpdateSession(sessionID.(int), userID.(int), "session_valid_totp", valid)
+
+	fmt.Printf("code:%v key:%v valid:%v\n", verify_code, u.TotpKey.String, valid)
+
+	d := map[string]interface{}{
+		"success": valid,
+	}
+	mulekick.WriteJSON(w, http.StatusOK, d)
 }

@@ -2,6 +2,7 @@ package db
 
 import (
 	"time"
+	"database/sql"
 )
 
 type User struct {
@@ -14,6 +15,7 @@ type User struct {
 	Admin    bool      `db:"admin" json:"admin"`
 	External bool      `db:"external" json:"external"`
 	Alert    bool      `db:"alert" json:"alert"`
+	TotpKey    sql.NullString      `db:"totp_key" json:"-"`
 }
 
 func FetchUser(userID int) (*User, error) {

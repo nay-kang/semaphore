@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/ansible-semaphore/semaphore/db"
 	"github.com/ansible-semaphore/semaphore/util"
+	"github.com/castawaylabs/mulekick"
 	"github.com/gorilla/context"
 )
 
@@ -52,8 +54,9 @@ func authentication(w http.ResponseWriter, r *http.Request) {
 		sessionID := sessionVal.(int)
 
 		// fetch session
-		var session db.Session
-		if err := db.Mysql.SelectOne(&session, "select * from session where id=? and user_id=? and expired=0", sessionID, userID); err != nil {
+		//var session db.Session
+		session, err := db.FetchSession(sessionID, userID)
+		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -64,14 +67,38 @@ func authentication(w http.ResponseWriter, r *http.Request) {
 			if _, err := db.Mysql.Exec("update session set expired=1 where id=?", sessionID); err != nil {
 				panic(err)
 			}
-
 			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
+		var session_valid_totp bool
+		session_valid_totp = false
+		if session.Data == nil {
+			session_valid_totp = false
+		} else {
+			session_valid_totp, _ = session.Data["session_valid_totp"].(bool)
+		}
+
+		path := r.URL.Path
+		pattern := regexp.MustCompile(`\/auth\/totp\/.*`)
+		is_goto_totp := pattern.MatchString(path)
+		if session_valid_totp == true && is_goto_totp == false {
+			//pass,right behavior
+		} else if session_valid_totp == false && is_goto_totp == true {
+			context.Set(r, "userID", userID)
+			context.Set(r, "sessionID", sessionID)
+		} else {
+			d := map[string]interface{}{
+				"session_valid_totp": false,
+			}
+			mulekick.WriteJSON(w, http.StatusUnauthorized, d)
 			return
 		}
 
 		if _, err := db.Mysql.Exec("update session set last_active=UTC_TIMESTAMP() where id=?", sessionID); err != nil {
 			panic(err)
 		}
+
 	}
 
 	user, err := db.FetchUser(userID)

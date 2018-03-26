@@ -422,8 +422,16 @@ func (t *task) getPlaybookArgs() ([]string, error) {
 			t.log("JSON is not valid")
 			return nil, err
 		}
-
-		args = append(args, "--extra-vars", t.environment.JSON)
+		//merge config file extra variables
+		if len(util.Config.AnsibleExtraVar) > 0 {
+			for _, str := range strings.Split(util.Config.AnsibleExtraVar, " ") {
+				item := strings.Split(str, "=")
+				js[item[0]] = item[1]
+			}
+		}
+		jsonbytes, _ := json.Marshal(js)
+		jsonstr := string(jsonbytes)
+		args = append(args, "--extra-vars", jsonstr)
 	}
 
 	var extraArgs []string

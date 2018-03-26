@@ -61,7 +61,7 @@ func authentication(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if time.Now().Sub(session.LastActive).Hours() > 7*24 {
+		if time.Now().Sub(session.LastActive).Minutes() > util.Config.SessionTime {
 			// more than week old unused session
 			// destroy.
 			if _, err := db.Mysql.Exec("update session set expired=1 where id=?", sessionID); err != nil {

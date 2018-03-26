@@ -7,7 +7,7 @@ CREATE TABLE `event` (
   KEY `project_id` (`project_id`),
   KEY `object_id` (`object_id`),
   KEY `created` (`created`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB ;
 
 alter table task add `created` datetime not null,
 	add `start` datetime null,

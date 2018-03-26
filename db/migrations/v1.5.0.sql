@@ -9,4 +9,4 @@ CREATE TABLE `session` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `expired` (`expired`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB ;

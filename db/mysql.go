@@ -32,7 +32,8 @@ func Connect() error {
 		}
 	}
 
-	Mysql = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8"}}
+	Mysql = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"}}
+	db.Exec("set names utf8mb4")
 	return nil
 }
 

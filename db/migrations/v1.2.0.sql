@@ -5,4 +5,4 @@ create table `user__token` (
 	`user_id` int(11) not null,
 
 	foreign key (`user_id`) references user(`id`) on delete cascade
-) ENGINE=InnoDB CHARSET=utf8;
+) ENGINE=InnoDB ;

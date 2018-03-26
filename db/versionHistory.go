@@ -22,7 +22,7 @@ create table ` + "`migrations`" + ` (
 	` + "`version`" + ` varchar(255) not null primary key,
 	` + "`upgraded_date`" + ` datetime null,
 	` + "`notes`" + ` text null
-) engine=innodb charset=utf8;
+) engine=innodb ;
 `
 
 func (version *DBVersion) VersionString() string {
@@ -73,5 +73,6 @@ func init() {
 		{Major: 2, Minor: 3, Patch: 2},
 		{Major: 2, Minor: 4},
 		{Major: 2, Minor: 5},
+		{Major: 2, Minor: 6},
 	}
 }

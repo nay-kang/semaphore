@@ -359,6 +359,7 @@ func (t *task) listPlaybookHosts() error {
 	cmd.Env = t.envVars(util.Config.TmpPath, cmd.Dir, nil)
 
 	out, err := cmd.Output()
+	fmt.Println(cmd)
 	re := regexp.MustCompile("(?m)^\\s{6}(.*)$")
 	matches := re.FindAllSubmatch(out, 20)
 	hosts := make([]string, len(matches))
@@ -379,6 +380,7 @@ func (t *task) runPlaybook() error {
 	cmd.Env = t.envVars(util.Config.TmpPath, cmd.Dir, nil)
 
 	t.logCmd(cmd)
+	fmt.Println(cmd)
 	cmd.Stdin = strings.NewReader("")
 	return cmd.Run()
 }
@@ -389,7 +391,7 @@ func (t *task) getPlaybookArgs() ([]string, error) {
 		playbookName = t.template.Playbook
 	}
 
-	var inventory string;
+	var inventory string
 	switch t.inventory.Type {
 	case "file":
 		inventory = t.inventory.Inventory

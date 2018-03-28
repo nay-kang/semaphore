@@ -136,6 +136,9 @@ define(['controllers/projects/taskRunner'], function () {
 					},
 					Template: function () {
 						return tpl;
+					},
+					Enviroment: function(){
+						return $scope.environmentAssoc[tpl.environment_id];
 					}
 				}
 			}).result.then(function (task) {

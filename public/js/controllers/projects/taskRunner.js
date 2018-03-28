@@ -1,7 +1,10 @@
 define(function () {
-	app.registerController('CreateTaskCtrl', ['$scope', '$http', 'Template', 'Project', function ($scope, $http, Template, Project) {
+	app.registerController('CreateTaskCtrl', ['$scope', '$http', 'Template', 'Project','Enviroment', function ($scope, $http, Template, Project,Enviroment) {
 		console.log(Template);
-		$scope.task = {};
+		console.log(Enviroment);
+		$scope.task = {
+			"environment":Enviroment.json
+		};
 
 		$scope.run = function (task, dryRun) {
 			task.template_id = Template.id;
